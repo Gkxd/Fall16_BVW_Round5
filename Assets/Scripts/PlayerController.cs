@@ -22,10 +22,6 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        float[] data = new float[44100];
-        audioSource.clip.GetData(data, 0);
-        Debug.Log(Mathf.Max(data));
-
         float[] spectrum = new float[1024];
         audioSource.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
 
