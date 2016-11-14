@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public class PlayerController : MonoBehaviour
 {
     private AudioSource audioSource;
+    private float progress;
+    public Transform[] points;
 
     void Start()
     {
@@ -29,5 +31,20 @@ public class PlayerController : MonoBehaviour
         {
             Debug.DrawLine(new Vector3(i - 1, spectrum[i] * 1000, 0), new Vector3(i, spectrum[i + 1] * 1000, 0), Color.red);
         }
+        if (Mathf.Max(spectrum) > 0.009f)
+        {
+            progress += 0.05f * Time.deltaTime;
+        }
+        transform.position = GetPosition();
+    }
+
+    private Vector3 GetPosition()
+    {
+        return points[0].position * (1 - progress) + points[1].position * progress;
+    }
+
+    private void OnTriggerEnter()
+    {
+        Debug.Log("Game Over");
     }
 }
