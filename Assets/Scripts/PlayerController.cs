@@ -2,11 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using UsefulThings;
+
 public class PlayerController : MonoBehaviour
 {
+
+    public Transform[] points;
+    public GameObject gameOverEffect;
+
     private AudioSource audioSource;
     private float progress;
-    public Transform[] points;
+    private bool gameOver;
 
     void Start()
     {
@@ -24,6 +30,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (gameOver) return;
+
         float[] spectrum = new float[1024];
         audioSource.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
 
@@ -45,6 +53,11 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter()
     {
-        Debug.Log("Game Over");
+        if (!gameOver)
+        {
+            SfxManager.PlaySfx(0);
+            gameOver = true;
+            gameOverEffect.SetActive(true);
+        }
     }
 }
