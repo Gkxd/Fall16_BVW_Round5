@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.DrawLine(new Vector3(i - 1, spectrum[i] * 1000, 0), new Vector3(i, spectrum[i + 1] * 1000, 0), Color.red);
         }
-        if (Mathf.Max(spectrum) > 0.009f)
+        if (Mathf.Max(spectrum) > 0.009f || Input.GetKey(KeyCode.G))
         {
             progress += 0.05f * Time.deltaTime;
         }
