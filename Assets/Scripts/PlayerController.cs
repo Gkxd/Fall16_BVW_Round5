@@ -9,18 +9,21 @@ public class PlayerController : MonoBehaviour
 
     public Transform[] points;
     public GameObject gameOverEffect;
-
-    private AudioSource audioSource;
+    public GameObject animatedVisual;
+    public GameObject stillVisual;
+    
     private float progress;
     private bool gameOver;
+    private bool moving;
+
+    private AudioClip recording;
 
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
+        recording = new AudioClip();
         if (Microphone.devices.Length > 0)
         {
-            audioSource.clip = Microphone.Start(Microphone.devices[0], true, 1, 44100);
-            audioSource.Play();
+            recording = Microphone.Start(Microphone.devices[0], true, 1, 44100);
         }
         else
         {
@@ -31,18 +34,32 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         if (gameOver) return;
+        
+        float[] data = new float[44100];
+        recording.GetData(data, 0);
 
-        float[] spectrum = new float[1024];
-        audioSource.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
-
-        for (int i = 1; i < spectrum.Length - 1; i++)
+        int micPosition = Microphone.GetPosition(Microphone.devices[0]);
+        float maxAmplitude = 0;
+        for (int i = 0; i < 44100; i++)
         {
-            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * 1000, 0), new Vector3(i, spectrum[i + 1] * 1000, 0), Color.red);
+            if ((44100 + micPosition - i) % 44100 < 4410)
+            {
+                if (Mathf.Abs(data[i]) > maxAmplitude)
+                {
+                    maxAmplitude = Mathf.Abs(data[i]);
+                }
+            }
         }
-        if (Mathf.Max(spectrum) > 0.009f || Input.GetKey(KeyCode.G))
+
+        moving = maxAmplitude > 0.4f || Input.GetKey(KeyCode.G);
+
+        animatedVisual.SetActive(moving);
+        stillVisual.SetActive(!moving);
+        if (moving)
         {
             progress += 0.05f * Time.deltaTime;
         }
+
         transform.position = GetPosition();
     }
 
@@ -51,8 +68,10 @@ public class PlayerController : MonoBehaviour
         return points[0].position * (1 - progress) + points[1].position * progress;
     }
 
-    private void OnTriggerEnter()
+    private void OnTriggerStay()
     {
+        if (!moving) return;
+
         if (!gameOver)
         {
             SfxManager.PlaySfx(0);
