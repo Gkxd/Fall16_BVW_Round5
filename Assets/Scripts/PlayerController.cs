@@ -14,6 +14,10 @@ public class PlayerController : MonoBehaviour
 
     [Header("Cutscene References")]
     public GameObject spotLights;
+    public Transform background;
+    public AudioSource music;
+    public Transform stage2BirdCages;
+    public AudioClip escapeMusic;
 
     private float progress;
     private bool gameOver;
@@ -72,6 +76,7 @@ public class PlayerController : MonoBehaviour
             if (progress >= 0.5f && !hasPlayedCutscene)
             {
                 cutsceneActive = hasPlayedCutscene = true;
+                StartCoroutine(Cutscene());
             }
 
             transform.position = GetPosition();
@@ -88,10 +93,35 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Cutscene()
     {
-        yield return new WaitForSeconds(1);
-        spotLights.SetActive(false);
+        yield return new WaitForSeconds(3);
+        spotLights.SetActive(false); // Turn off spotlights
+        SfxManager.PlaySfx(1);
+        music.Stop();
+        music.timeSamples = 0;
 
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(3);
+
+        // Make background fall down
+        foreach (Transform t in background)
+        {
+            Rigidbody r = t.GetComponent<Rigidbody>();
+            r.isKinematic = false;
+            r.AddRelativeTorque(Random.onUnitSphere * 3, ForceMode.Impulse);
+        }
+
+        yield return new WaitForSeconds(3);
+
+        foreach(Transform t in stage2BirdCages)
+        {
+            t.gameObject.SetActive(true);
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        yield return new WaitForSeconds(1.5f);
+
+        // Begin countdown
+        music.clip = escapeMusic;
+        music.Play();
 
         cutsceneActive = false;
         yield return null;
