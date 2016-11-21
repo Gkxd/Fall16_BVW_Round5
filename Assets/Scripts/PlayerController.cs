@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public AudioSource music;
     public Transform stage2BirdCages;
     public AudioClip escapeMusic;
+    public GameObject closingDoor;
 
     private float progress;
     private bool gameOver;
@@ -93,7 +94,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Cutscene()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1);
         spotLights.SetActive(false); // Turn off spotlights
         SfxManager.PlaySfx(1);
         music.Stop();
@@ -108,8 +109,9 @@ public class PlayerController : MonoBehaviour
             r.isKinematic = false;
             r.AddRelativeTorque(Random.onUnitSphere * 3, ForceMode.Impulse);
         }
+        SfxManager.PlaySfx(5);
 
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1);
 
         foreach(Transform t in stage2BirdCages)
         {
@@ -122,6 +124,8 @@ public class PlayerController : MonoBehaviour
         // Begin countdown
         music.clip = escapeMusic;
         music.Play();
+        SfxManager.PlayLoop(0); // Door clanking sound
+        closingDoor.SetActive(true);
 
         cutsceneActive = false;
         yield return null;
